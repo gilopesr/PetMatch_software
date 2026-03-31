@@ -8,6 +8,7 @@ from user.user_model import User
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    #app.secret_key = 'chave_secreta'
     
     CORS(app)
     
