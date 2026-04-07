@@ -12,7 +12,7 @@ class User(db.Model):
     tipo = db.Column(db.String(20), nullable=False)
     endereco = db.Column(db.String(128), nullable=False)
 
-    #pets = db.relationship('Animais', back_populates='responsavel')
+    pets = db.relationship('Animais', back_populates='responsavel')
 
     def set_password(self, password):
         self.senha = generate_password_hash(password)
