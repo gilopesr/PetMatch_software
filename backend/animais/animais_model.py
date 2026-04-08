@@ -13,3 +13,6 @@ class Animais(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     responsavel = db.relationship('User', back_populates='pets')
+
+class AnimalNaoEncontrado(Exception):
+    pass
