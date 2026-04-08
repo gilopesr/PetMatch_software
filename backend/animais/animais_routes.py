@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
 from config import db
-from animais.animais_model import Animais
+from animais.animais_model import Animais,AnimalNaoEncontrado
 
 animais_bp = Blueprint('animais_bp', __name__)
 
@@ -57,3 +57,14 @@ def listar_animais():
         })
 
     return jsonify(lista_animais), 200
+
+@animais_bp.route("/animais/<int:id>",methods=['DELETE'])
+def deletar_animal(id):
+    try:
+        animal = Animais.query.get(id)
+        db.session.delete(animal)
+        db.session.commit()
+        return jsonify({"Sucesso":"Animal deletado com sucesso"}),204
+    except AnimalNaoEncontrado:
+        db.session.rollback()
+        return jsonify({"Erro":"Esse animal não foi encontrado"}),404
