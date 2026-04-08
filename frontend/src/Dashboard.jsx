@@ -100,6 +100,27 @@ function VisaoGeral() {
 function MeusPets() {
   const [meusPets, setMeusPets] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [del, setDel] = useState('delete');
+
+ const deletePet = async(id) => {
+      try{
+        fetch(`${API_URL}/${id}`,{
+          method: "DELETE"
+        }).then(data => {
+          alert("Animal excluído com sucesso",data.json())
+          location.reload()
+        }).catch(err =>{
+          console.error(`Ocorre um erro ao tentar deletar o animal: ${err}`)
+        }
+
+        )
+        //setDel(true)
+      }catch(erro){
+        console.error("Erro durante a deleção de pets",erro)
+        
+      }
+    
+     }
 
   useEffect(() => {
     const buscarPets = async () => {
@@ -144,7 +165,7 @@ function MeusPets() {
               </div>
               <div className="mt-4 flex gap-2 border-t pt-4">
                 <button className="text-sm text-blue-600 hover:underline font-medium">Editar</button>
-                <button className="text-sm text-red-600 hover:underline font-medium">Excluir</button>
+                <button className="text-sm text-red-600 hover:underline font-medium" id="delete" onClick={ () => deletePet(pet.id)} type='button'>Excluir</button>
               </div>
             </div>
           ))}
