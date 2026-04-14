@@ -35,7 +35,45 @@ def list_users():
     users = User.query.all()
     return jsonify([u.to_dict() for u in users])
 
+@user_bp.route('/users/<int:id>', methods=['GET'])
+def get_user(id):
+    usuario = User.query.get(id)
+    
+    if not usuario:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+        
+    return jsonify(usuario.to_dict()), 200
 
+@user_bp.route('/users/<int:id>', methods=['PUT'])
+def update_user(id):
+    usuario = User.query.get(id)
+    
+    if not usuario:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+
+    data = request.get_json()
+
+    # Atualiza apenas os campos que vieram no JSON (se não vier, mantém o atual)
+    usuario.nome = data.get('nome', usuario.nome)
+    usuario.email = data.get('email', usuario.email)
+    usuario.telefone = data.get('telefone', usuario.telefone)
+    usuario.endereco = data.get('endereco', usuario.endereco)
+    
+    # Se quiser permitir que o usuário atualize a senha pelo perfil no futuro:
+    # if 'senha' in data and data['senha']:
+    #     usuario.set_password(data['senha'])
+
+    try:
+        db.session.commit()
+        return jsonify({
+            "message": "Perfil atualizado com sucesso!",
+            "user": usuario.to_dict()
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Erro ao atualizar perfil: " + str(e)}), 400
+    
+    
 @user_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
