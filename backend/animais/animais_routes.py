@@ -11,7 +11,7 @@ animais_bp = Blueprint('animais_bp', __name__)
 def cadastrar_animal():
     data = request.get_json()
 
-    campos_obrigatorios = ['nome', 'especie', 'raca', 'idade', 'user_id']
+    campos_obrigatorios = ['nome', 'especie', 'raca', 'idade', 'user_id','img']
     for campo in campos_obrigatorios:
         if campo not in data:
             return jsonify({"erro": f"O campo '{campo}' é obrigatório."}), 400
@@ -23,7 +23,8 @@ def cadastrar_animal():
             raca=data['raca'],
             idade=data['idade'],
             status=data.get('status', 'disponivel'),
-            user_id=data['user_id'] 
+            user_id=data['user_id'] ,
+            img=data['img']
         )
 
         db.session.add(novo_animal)
@@ -55,7 +56,8 @@ def listar_animais():
             "raca": animal.raca,
             "idade": animal.idade,
             "status": animal.status,
-            "user_id": animal.user_id
+            "user_id": animal.user_id,
+            "img":animal.img
         })
 
     return jsonify(lista_animais), 200
