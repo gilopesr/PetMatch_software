@@ -62,6 +62,22 @@ def listar_animais():
 
     return jsonify(lista_animais), 200
 
+@animais_bp.route('/animais/<int:id>',methods=['PUT'])
+def atualizar_animal(id):
+    try:
+     data = request.json
+     animal = Animais.query.get(id)
+     animal.nome = data['nome']
+     animal.raca = data['raca']
+     animal.especie = data['especie']
+     animal.img = data['img']
+     animal.idade = data['idade']
+     db.session.commit()
+     return jsonify({'sucesso':'animal atualizado com sucesso'}),201   
+    except AnimalNaoEncontrado:
+        return jsonify({"erro":'O animal não foi encontrado'}),404
+
+
 @animais_bp.route("/animais/<int:id>", methods=['DELETE'])
 def deletar_animal(id):
     animal = Animais.query.get(id)
