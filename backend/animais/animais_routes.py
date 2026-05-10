@@ -23,7 +23,8 @@ def cadastrar_animal():
             raca=data['raca'],
             idade=data['idade'],
             status=data.get('status', 'disponivel'),
-            user_id=data['user_id'] 
+            user_id=data.get['user_id'],
+            saude=data['saude']
         )
 
         db.session.add(novo_animal)
@@ -55,7 +56,8 @@ def listar_animais():
             "raca": animal.raca,
             "idade": animal.idade,
             "status": animal.status,
-            "user_id": animal.user_id
+            "user_id": animal.user_id,
+            "saude": animal.saude
         })
 
     return jsonify(lista_animais), 200

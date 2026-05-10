@@ -101,9 +101,14 @@ function MeusPets() {
   const [meusPets, setMeusPets] = useState([]);
   const [carregando, setCarregando] = useState(true);
   
-  // Novos estados para controlar os pop-ups
-  const [petParaExcluir, setPetParaExcluir] = useState(null); // Armazena o pet que está prestes a ser excluído
-  const [mensagemSucesso, setMensagemSucesso] = useState(''); // Controla o aviso de sucesso
+  // Estados para exclusão
+  const [petParaExcluir, setPetParaExcluir] = useState(null);
+  
+  // Novo estado para edição
+  const [petParaEditar, setPetParaEditar] = useState(null); 
+  
+  // Estado para mensagens
+  const [mensagemSucesso, setMensagemSucesso] = useState('');
 
   useEffect(() => {
     const buscarPets = async () => {
@@ -120,7 +125,6 @@ function MeusPets() {
     buscarPets();
   }, []);
 
-  // Nova função para confirmar e executar a exclusão
   const confirmarExclusao = async () => {
     if (!petParaExcluir) return;
 
@@ -130,22 +134,53 @@ function MeusPets() {
       });
 
       if (response.ok) {
-        // Atualiza a lista na tela removendo o pet excluído (sem precisar dar reload na página)
         setMeusPets(meusPets.filter(pet => pet.id !== petParaExcluir.id));
-        
-        // Fecha o modal e mostra a mensagem de sucesso
         setMensagemSucesso(`O pet "${petParaExcluir.nome}" foi excluído com sucesso!`);
         setPetParaExcluir(null);
-
-        // Esconde a mensagem de sucesso após 3 segundos
-        setTimeout(() => {
-          setMensagemSucesso('');
-        }, 3000);
+        setTimeout(() => setMensagemSucesso(''), 3000);
       } else {
         alert("Ocorreu um erro ao excluir na API.");
       }
     } catch (erro) {
       console.error("Erro durante a deleção de pets", erro);
+    }
+  };
+
+  // Nova função para lidar com as mudanças nos campos do formulário de edição
+  const handleMudancaEdicao = (e) => {
+    const { name, value } = e.target;
+    setPetParaEditar((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Nova função para salvar a edição na API
+  const salvarEdicao = async (e) => {
+    e.preventDefault(); // Evita o recarregamento da página
+    if (!petParaEditar) return;
+
+    try {
+      const response = await fetch(`${API_URL}/${petParaEditar.id}`, {
+        method: "PUT", // ou PATCH, dependendo da sua API Flask
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(petParaEditar),
+      });
+
+      if (response.ok) {
+        // Atualiza a lista na tela com os novos dados do pet
+        setMeusPets(meusPets.map(pet => pet.id === petParaEditar.id ? petParaEditar : pet));
+        
+        setMensagemSucesso(`O pet "${petParaEditar.nome}" foi atualizado com sucesso!`);
+        setPetParaEditar(null); // Fecha o modal
+        setTimeout(() => setMensagemSucesso(''), 3000);
+      } else {
+        alert("Ocorreu um erro ao salvar as edições na API.");
+      }
+    } catch (erro) {
+      console.error("Erro durante a edição do pet", erro);
     }
   };
 
@@ -174,10 +209,22 @@ function MeusPets() {
                 <p className="text-gray-600 text-sm">Espécie: <span className="font-medium">{pet.especie}</span></p>
                 <p className="text-gray-600 text-sm">Raça: <span className="font-medium">{pet.raca}</span></p>
                 <p className="text-gray-600 text-sm">Idade: <span className="font-medium">{pet.idade} anos</span></p>
+                {/* Exibindo a info de saúde no card, caso exista */}
+                {pet.infoSaude && (
+                  <p className="text-gray-600 text-sm mt-2 pt-2 border-t border-gray-100">
+                    🏥 Saúde: <span className="font-medium text-gray-500">{pet.infoSaude}</span>
+                  </p>
+                )}
               </div>
               <div className="mt-4 flex gap-2 border-t pt-4">
-                <button className="text-sm text-blue-600 hover:underline font-medium">Editar</button>
-                {/* O botão agora apenas abre o modal, definindo qual pet será excluído */}
+                {/* Botão de editar agora abre o modal passando o pet atual */}
+                <button 
+                  className="text-sm text-blue-600 hover:underline font-medium"
+                  onClick={() => setPetParaEditar(pet)}
+                  type='button'
+                >
+                  Editar
+                </button>
                 <button 
                   className="text-sm text-red-600 hover:underline font-medium" 
                   onClick={() => setPetParaExcluir(pet)} 
@@ -191,6 +238,68 @@ function MeusPets() {
         </div>
       )}
 
+      {/* MODAL DE EDIÇÃO */}
+      {petParaEditar && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-md w-full mx-4 animate-fade-in max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Editar Pet</h3>
+            
+            <form onSubmit={salvarEdicao} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                <input type="text" name="nome" value={petParaEditar.nome || ''} onChange={handleMudancaEdicao} className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none" required />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Espécie</label>
+                  <input type="text" name="especie" value={petParaEditar.especie || ''} onChange={handleMudancaEdicao} className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Idade</label>
+                  <input type="number" name="idade" value={petParaEditar.idade || ''} onChange={handleMudancaEdicao} className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none" required />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Raça</label>
+                <input type="text" name="raca" value={petParaEditar.raca || ''} onChange={handleMudancaEdicao} className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none" required />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status" value={petParaEditar.status || 'disponivel'} onChange={handleMudancaEdicao} className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="disponivel">Disponível</option>
+                  <option value="indisponivel">Indisponível</option>
+                </select>
+              </div>
+
+              {/* NOVO CAMPO: INFORMAÇÕES DE SAÚDE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Informações de Saúde</label>
+                <textarea 
+                  name="infoSaude" 
+                  value={petParaEditar.infoSaude || ''} 
+                  onChange={handleMudancaEdicao} 
+                  rows="3" 
+                  placeholder="Vacinas, alergias, medicações contínuas..."
+                  className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end mt-4">
+                <button type="button" onClick={() => setPetParaEditar(null)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
+                  Cancelar
+                </button>
+                <button type="submit" className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors">
+                  Salvar Alterações
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
       {petParaExcluir && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -200,16 +309,10 @@ function MeusPets() {
               Tem certeza que deseja excluir o pet <strong>{petParaExcluir.nome}</strong>? Esta ação não pode ser desfeita.
             </p>
             <div className="flex gap-3 justify-end">
-              <button 
-                onClick={() => setPetParaExcluir(null)} 
-                className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
-              >
+              <button onClick={() => setPetParaExcluir(null)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
                 Cancelar
               </button>
-              <button 
-                onClick={confirmarExclusao} 
-                className="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded-lg font-medium transition-colors"
-              >
+              <button onClick={confirmarExclusao} className="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded-lg font-medium transition-colors">
                 Sim, Excluir
               </button>
             </div>
@@ -219,7 +322,7 @@ function MeusPets() {
 
       {/* POP-UP DE SUCESSO (TOAST) */}
       {mensagemSucesso && (
-        <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg font-medium animate-bounce">
+        <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg font-medium animate-bounce z-50">
           ✅ {mensagemSucesso}
         </div>
       )}
@@ -227,6 +330,7 @@ function MeusPets() {
     </div>
   );
 }
+
 
 const API_USER_URL = 'http://localhost:3006/users/1'; 
 

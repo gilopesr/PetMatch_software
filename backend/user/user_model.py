@@ -20,4 +20,4 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.senha, password)
     def to_dict(self):
-        return {"id": self.id, "nome": self.nome, "email": self.email}
+        return {"id": self.id, "nome": self.nome, "email": self.email, "endereco": self.endereco, "telefone": self.telefone}
