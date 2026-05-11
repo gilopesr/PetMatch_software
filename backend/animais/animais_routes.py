@@ -23,13 +23,8 @@ def cadastrar_animal():
             raca=data['raca'],
             idade=data['idade'],
             status=data.get('status', 'disponivel'),
-<<<<<<< HEAD
-            user_id=data.get['user_id'],
-            saude=data['saude']
-=======
             user_id=data['user_id'] ,
             img=data['img']
->>>>>>> teste_g
         )
 
         db.session.add(novo_animal)
