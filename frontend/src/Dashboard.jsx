@@ -9,6 +9,7 @@ function VisaoGeral() {
   const [especie, setEspecie] = useState('Cachorro');
   const [raca, setRaca] = useState('');
   const [idade, setIdade] = useState('');
+  const [img, setImg] = useState('');
   const navigate = useNavigate();
 
   const handleCadastrar = async (e) => {
@@ -19,7 +20,8 @@ function VisaoGeral() {
       especie,
       raca,
       idade: parseInt(idade),
-      user_id: 1 // Será substituído pelo ID real depois
+      img,
+      user_id: 1 ,// Será substituído pelo ID real depois,
     };
 
     try {
@@ -70,6 +72,10 @@ function VisaoGeral() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Raça</label>
             <input type="text" value={raca} onChange={(e) => setRaca(e.target.value)} required className="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-[#E56A45]" placeholder="Ex: Vira-lata (SRD)" />
           </div>
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>Foto:</label>
+            <input type="text" value={img} onChange={(e) => setImg(e.target.value)} required className='w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-orange-600' placeholder='Foto do pet'/>
+          </div>
           <button type="submit" className="w-full bg-[#E56A45] text-white font-bold py-3 rounded-lg hover:bg-[#d45a36] transition-colors mt-4">
             Salvar Cadastro
           </button>
@@ -98,17 +104,15 @@ function VisaoGeral() {
 
 
 function MeusPets() {
+  const [pet ,setPet] = useState({nome:'',raca:'',especie:'',idade:'',img:''});
   const [meusPets, setMeusPets] = useState([]);
   const [carregando, setCarregando] = useState(true);
-  
-  // Estados para exclusão
-  const [petParaExcluir, setPetParaExcluir] = useState(null);
-  
-  // Novo estado para edição
-  const [petParaEditar, setPetParaEditar] = useState(null); 
-  
-  // Estado para mensagens
-  const [mensagemSucesso, setMensagemSucesso] = useState('');
+  const [petEdit, setPetEdit] = useState(null); // variável que edita um pet específico
+  const [petEdited,setPetEdited] = useState({})
+
+  // Novos estados para controlar os pop-ups
+  const [petParaExcluir, setPetParaExcluir] = useState(null); // Armazena o pet que está prestes a ser excluído
+  const [mensagemSucesso, setMensagemSucesso] = useState(''); // Controla o aviso de sucesso
 
   useEffect(() => {
     const buscarPets = async () => {
@@ -125,6 +129,46 @@ function MeusPets() {
     buscarPets();
   }, []);
 
+const updatePet = async(e) =>{
+  e.preventDefault();
+
+  try{
+
+    const response = await fetch(`${API_URL}/${petEdited.id}`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(petEdited),
+    })
+
+
+   if(response.ok){
+    setMeusPets(meusPets.map(pet => pet.id === petEdited.id ? petEdited : pet))
+    setMensagemSucesso(`Pet ${petEdited.nome} atualizado com sucesso`)
+    setPetEdit(null)
+
+    setTimeout(() =>{
+      setMensagemSucesso('');
+    },3000)
+    
+  }
+  }catch(err){
+    console.log(`Erro durante a atualização: ${err}`)
+  }
+}
+
+function handleChangeEdit(e){
+  const {name,value} = e.target;
+
+  setPetEdited(data =>(
+    {
+      ...data,
+      [name]:value
+    }
+  ))
+
+}
+
+// Nova função para confirmar e executar a exclusão
   const confirmarExclusao = async () => {
     if (!petParaExcluir) return;
 
@@ -197,7 +241,8 @@ function MeusPets() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {meusPets.map((pet) => (
+          {meusPets.map((pet) => 
+          petEdit != pet.id ? (
             <div key={pet.id} className="border border-gray-200 rounded-xl p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div>
                 <div className="flex justify-between items-start mb-2">
@@ -209,22 +254,14 @@ function MeusPets() {
                 <p className="text-gray-600 text-sm">Espécie: <span className="font-medium">{pet.especie}</span></p>
                 <p className="text-gray-600 text-sm">Raça: <span className="font-medium">{pet.raca}</span></p>
                 <p className="text-gray-600 text-sm">Idade: <span className="font-medium">{pet.idade} anos</span></p>
-                {/* Exibindo a info de saúde no card, caso exista */}
-                {pet.infoSaude && (
-                  <p className="text-gray-600 text-sm mt-2 pt-2 border-t border-gray-100">
-                    🏥 Saúde: <span className="font-medium text-gray-500">{pet.infoSaude}</span>
-                  </p>
-                )}
+                <p className='text-gray-600 text-sm'><span>Imagem do pet:</span></p><br />
+                <img className="h-30 w-40 rounded-lg border-2" src={pet.img}></img>
               </div>
               <div className="mt-4 flex gap-2 border-t pt-4">
-                {/* Botão de editar agora abre o modal passando o pet atual */}
-                <button 
-                  className="text-sm text-blue-600 hover:underline font-medium"
-                  onClick={() => setPetParaEditar(pet)}
-                  type='button'
-                >
-                  Editar
-                </button>
+                <button className="text-sm text-blue-600 hover:underline font-medium" onClick={() => { setPetEdit(pet.id); 
+                setPetEdited(pet);}
+                }>Editar</button>
+                {/* O botão agora apenas abre o modal, definindo qual pet será excluído */}
                 <button 
                   className="text-sm text-red-600 hover:underline font-medium" 
                   onClick={() => setPetParaExcluir(pet)} 
@@ -234,6 +271,27 @@ function MeusPets() {
                 </button>
               </div>
             </div>
+          ) : (
+              <form key={pet.id} onSubmit={updatePet} className='border-5'>
+                  <div className='border-yellow-400'>
+                    <label className="m-3">Nome: </label>
+                    <input type="text" value={petEdited.nome || ''} name="nome" onChange={handleChangeEdit}/><br />
+                    <label className="m-3">Espécie</label>
+                    <select type="text"  value={petEdited.especie || ''} name="especie" onChange={handleChangeEdit}>
+                      <option value="cachorro">Cachorro</option>
+                      <option value="gato">Gato</option>
+                      <option value="ave">Ave</option>
+                    </select>
+                     <br />
+                    <label className="m-3">Raça</label>
+                    <input type="text" name="raca" value={petEdited.raca || ''} onChange={handleChangeEdit} /><br />
+                    <label className='m-3'>Idade: </label>
+                    <input type="number" name="idade" value={petEdited.idade || '' } onChange={handleChangeEdit}/><br />
+                    <label className='m-3'>Foto: </label>
+                    <input type="text" name="img" value={petEdited.img || ''} onChange={handleChangeEdit}/><br />
+                    <button className='p-4 bg-amber-500 font-bold text-amber-100 border-yellow-900 rounded-lg' type='submit'>Salvar</button>
+                  </div>
+              </form>
           ))}
         </div>
       )}
