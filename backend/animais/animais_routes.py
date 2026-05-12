@@ -24,7 +24,8 @@ def cadastrar_animal():
             idade=data['idade'],
             status=data.get('status', 'disponivel'),
             user_id=data['user_id'] ,
-            img=data['img']
+            img=data['img'],
+            saude=data.get["saude"]
         )
 
         db.session.add(novo_animal)
@@ -57,7 +58,8 @@ def listar_animais():
             "idade": animal.idade,
             "status": animal.status,
             "user_id": animal.user_id,
-            "img":animal.img
+            "img":animal.img,
+            "saude": animal.saude
         })
 
     return jsonify(lista_animais), 200
@@ -72,6 +74,7 @@ def atualizar_animal(id):
      animal.especie = data['especie']
      animal.img = data['img']
      animal.idade = data['idade']
+     animal.saude = data['saude']
      db.session.commit()
      return jsonify({'sucesso':'animal atualizado com sucesso'}),201   
     except AnimalNaoEncontrado:

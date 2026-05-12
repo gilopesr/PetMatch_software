@@ -104,15 +104,14 @@ function VisaoGeral() {
 
 
 function MeusPets() {
-  const [pet ,setPet] = useState({nome:'',raca:'',especie:'',idade:'',img:''});
+  const [pet, setPet] = useState({nome:'',raca:'',especie:'',idade:'',img:''});
   const [meusPets, setMeusPets] = useState([]);
   const [carregando, setCarregando] = useState(true);
-  const [petEdit, setPetEdit] = useState(null); // variável que edita um pet específico
-  const [petEdited,setPetEdited] = useState({})
+  const [petEdit, setPetEdit] = useState(null); 
+  const [petEdited, setPetEdited] = useState({});
 
-  // Novos estados para controlar os pop-ups
-  const [petParaExcluir, setPetParaExcluir] = useState(null); // Armazena o pet que está prestes a ser excluído
-  const [mensagemSucesso, setMensagemSucesso] = useState(''); // Controla o aviso de sucesso
+  const [petParaExcluir, setPetParaExcluir] = useState(null); 
+  const [mensagemSucesso, setMensagemSucesso] = useState(''); 
 
   useEffect(() => {
     const buscarPets = async () => {
@@ -129,63 +128,49 @@ function MeusPets() {
     buscarPets();
   }, []);
 
-const updatePet = async(e) =>{
-  e.preventDefault();
+  const updatePet = async(e) => {
+    e.preventDefault();
+    try{
+      const response = await fetch(`${API_URL}/${petEdited.id}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(petEdited),
+      });
 
-  try{
+      if(response.ok){
+        setMeusPets(meusPets.map(pet => pet.id === petEdited.id ? petEdited : pet));
+        setMensagemSucesso(`Pet ${petEdited.nome} atualizado com sucesso`);
+        setPetEdit(null);
 
-    const response = await fetch(`${API_URL}/${petEdited.id}`, {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(petEdited),
-    })
-
-
-   if(response.ok){
-    setMeusPets(meusPets.map(pet => pet.id === petEdited.id ? petEdited : pet))
-    setMensagemSucesso(`Pet ${petEdited.nome} atualizado com sucesso`)
-    setPetEdit(null)
-
-    setTimeout(() =>{
-      setMensagemSucesso('');
-    },3000)
-    
-  }
-  }catch(err){
-    console.log(`Erro durante a atualização: ${err}`)
-  }
-}
-
-function handleChangeEdit(e){
-  const {name,value} = e.target;
-
-  setPetEdited(data =>(
-    {
-      ...data,
-      [name]:value
+        setTimeout(() => {
+          setMensagemSucesso('');
+        }, 3000);
+      }
+    }catch(err){
+      console.log(`Erro durante a atualização: ${err}`);
     }
-  ))
+  }
 
-}
+  function handleChangeEdit(e){
+    const {name, value} = e.target;
+    setPetEdited(data => ({
+      ...data,
+      [name]: value
+    }));
+  }
 
-// Nova função para confirmar e executar a exclusão
   const confirmarExclusao = async () => {
     if (!petParaExcluir) return;
-
     try {
       const response = await fetch(`${API_URL}/${petParaExcluir.id}`, {
         method: "DELETE"
       });
 
       if (response.ok) {
-        // Atualiza a lista na tela removendo o pet excluído (sem precisar dar reload na página)
         setMeusPets(meusPets.filter(pet => pet.id !== petParaExcluir.id));
-        
-        // Fecha o modal e mostra a mensagem de sucesso
         setMensagemSucesso(`O pet "${petParaExcluir.nome}" foi excluído com sucesso!`);
         setPetParaExcluir(null);
 
-        // Esconde a mensagem de sucesso após 3 segundos
         setTimeout(() => {
           setMensagemSucesso('');
         }, 3000);
@@ -211,57 +196,108 @@ function handleChangeEdit(e){
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {meusPets.map((pet) => 
-          petEdit != pet.id ? (
-            <div key={pet.id} className="border border-gray-200 rounded-xl p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
-              <div>
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="text-lg font-bold text-gray-800">{pet.nome}</h4>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${pet.status === 'disponivel' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                    {pet.status === 'disponivel' ? 'Disponível' : 'Indisponível'}
-                  </span>
-                </div>
-                <p className="text-gray-600 text-sm">Espécie: <span className="font-medium">{pet.especie}</span></p>
-                <p className="text-gray-600 text-sm">Raça: <span className="font-medium">{pet.raca}</span></p>
-                <p className="text-gray-600 text-sm">Idade: <span className="font-medium">{pet.idade} anos</span></p>
-                <p className='text-gray-600 text-sm'><span>Imagem do pet:</span></p><br />
-                <img className="h-30 w-40 rounded-lg border-2" src={pet.img}></img>
-              </div>
-              <div className="mt-4 flex gap-2 border-t pt-4">
-                <button className="text-sm text-blue-600 hover:underline font-medium" onClick={() => { setPetEdit(pet.id); 
-                setPetEdited(pet);}
-                }>Editar</button>
-                {/* O botão agora apenas abre o modal, definindo qual pet será excluído */}
-                <button 
-                  className="text-sm text-red-600 hover:underline font-medium" 
-                  onClick={() => setPetParaExcluir(pet)} 
-                  type='button'
-                >
-                  Excluir
-                </button>
-              </div>
-            </div>
-          ) : (
-              <form key={pet.id} onSubmit={updatePet} className='border-5'>
-                  <div className='border-yellow-400'>
-                    <label className="m-3">Nome: </label>
-                    <input type="text" value={petEdited.nome || ''} name="nome" onChange={handleChangeEdit}/><br />
-                    <label className="m-3">Espécie</label>
-                    <select type="text"  value={petEdited.especie || ''} name="especie" onChange={handleChangeEdit}>
-                      <option value="cachorro">Cachorro</option>
-                      <option value="gato">Gato</option>
-                      <option value="ave">Ave</option>
-                    </select>
-                     <br />
-                    <label className="m-3">Raça</label>
-                    <input type="text" name="raca" value={petEdited.raca || ''} onChange={handleChangeEdit} /><br />
-                    <label className='m-3'>Idade: </label>
-                    <input type="number" name="idade" value={petEdited.idade || '' } onChange={handleChangeEdit}/><br />
-                    <label className='m-3'>Foto: </label>
-                    <input type="text" name="img" value={petEdited.img || ''} onChange={handleChangeEdit}/><br />
-                    <button className='p-4 bg-amber-500 font-bold text-amber-100 border-yellow-900 rounded-lg' type='submit'>Salvar</button>
+            petEdit !== pet.id ? (
+              // --- MODO VISUALIZAÇÃO ---
+              <div key={pet.id} className="border border-gray-200 rounded-xl p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className="text-lg font-bold text-gray-800 capitalize">{pet.nome}</h4>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${pet.status === 'disponivel' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                      {pet.status === 'disponivel' ? 'Disponível' : 'Indisponível'}
+                    </span>
                   </div>
+                  
+                  <div className="space-y-1 mb-4">
+                    <p className="text-gray-600 text-sm">Espécie: <span className="font-medium capitalize">{pet.especie}</span></p>
+                    <p className="text-gray-600 text-sm">Raça: <span className="font-medium capitalize">{pet.raca}</span></p>
+                    <p className="text-gray-600 text-sm">Idade: <span className="font-medium">{pet.idade} anos</span></p>
+                    <p className="text-gray-600 text-sm">Informações de Saude: <span className="font-medium">{pet.saude}</span></p>
+                  </div>
+                  
+                  {/* Imagem com object-cover para não achatar */}
+                  <img className="h-60 w-full object-cover rounded-lg border border-gray-200" src={pet.img} alt={`Foto de ${pet.nome}`} />
+                </div>
+                
+                <div className="mt-4 flex gap-4 border-t border-gray-100 pt-4">
+                  <button 
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors" 
+                    onClick={() => { 
+                      setPetEdit(pet.id); 
+                      setPetEdited(pet);
+                    }}
+                  >
+                    Editar
+                  </button>
+                  <button 
+                    className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors" 
+                    onClick={() => setPetParaExcluir(pet)} 
+                    type='button'
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // --- MODO EDIÇÃO ---
+              <form key={pet.id} onSubmit={updatePet} className="border border-blue-200 bg-blue-50/30 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+                <div className="space-y-3">
+                  <h4 className="text-lg font-bold text-gray-800 mb-2">Editar Pet</h4>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Nome</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" type="text" value={petEdited.nome || ''} name="nome" onChange={handleChangeEdit} required/>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Informações de Saude</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" type="text" value={petEdited.saude || ''} name="saude" onChange={handleChangeEdit} required/>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Espécie</label>
+                      <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" value={petEdited.especie || ''} name="especie" onChange={handleChangeEdit}>
+                        <option value="cachorro">Cachorro</option>
+                        <option value="gato">Gato</option>
+                        <option value="outro">Outro</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Raça</label>
+                      <input className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" type="text" name="raca" value={petEdited.raca || ''} onChange={handleChangeEdit} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Idade</label>
+                      <input className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" type="number" name="idade" value={petEdited.idade || '' } onChange={handleChangeEdit}/>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">URL da Foto</label>
+                      <input className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" type="text" name="img" value={petEdited.img || ''} onChange={handleChangeEdit}/>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex gap-2 border-t border-gray-200 pt-4 justify-end">
+                  <button 
+                    type="button" 
+                    onClick={() => setPetEdit(null)} 
+                    className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="px-4 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                  >
+                    Salvar
+                  </button>
+                </div>
               </form>
-          ))}
+            )
+          )}
         </div>
       )}
 
@@ -293,7 +329,7 @@ function handleChangeEdit(e){
 
       {/* POP-UP DE SUCESSO (TOAST) */}
       {mensagemSucesso && (
-        <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg font-medium animate-bounce">
+        <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg font-medium animate-bounce z-50">
           ✅ {mensagemSucesso}
         </div>
       )}
