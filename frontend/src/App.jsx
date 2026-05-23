@@ -4,6 +4,8 @@ import Home from './Home';
 import Login from './Login';
 import Cadastro from './Cadastro';
 import Dashboard from './Dashboard';
+import Adocao from './Adocao';
+import MeusPedidos from './MeusPedidos';
 
 function App() {
   return (
@@ -13,6 +15,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/adocao" element={<Adocao />} />
+        <Route path="/dashboard/pedidos" element={<MeusPedidos />} />
         
       </Routes>
     </Router>

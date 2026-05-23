@@ -4,7 +4,7 @@ from config import Config, db
 from user.user_route import user_bp
 from user.user_model import User
 from animais.animais_routes import animais_bp
-from animais.animais_model import Animais
+from animais.animais_model import Animais, PedidoAdocao
 
 
 def create_app():

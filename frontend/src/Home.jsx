@@ -76,6 +76,15 @@ function Home() {
             ))}
           </div>
         </div>
+
+        <div className="mt-8 text-center">
+        <Link 
+          to="/adocao" 
+          className="inline-block px-8 py-4 bg-[#E56A45] text-white text-lg font-bold rounded-full hover:bg-[#d45a36] shadow-lg "
+        >
+          🐶 Veja aqui os animais para adoção 🐱
+        </Link>
+      </div>
       </section>
 
       {/* RODAPÉ / CTA FINAL */}

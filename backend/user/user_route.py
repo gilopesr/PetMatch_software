@@ -17,7 +17,8 @@ def create_user():
         email=data['email'],
         telefone=data.get('telefone'),
         tipo=data['tipo'],
-        endereco=data['endereco']
+        endereco=data['endereco'],
+        img=data['img']
     )
     
     novo_usuario.set_password(data['senha'])
@@ -58,6 +59,7 @@ def update_user(id):
     usuario.email = data.get('email', usuario.email)
     usuario.telefone = data.get('telefone', usuario.telefone)
     usuario.endereco = data.get('endereco', usuario.endereco)
+    usuario.img = data.get('img', usuario.img)
     
     # Se quiser permitir que o usuário atualize a senha pelo perfil no futuro:
     # if 'senha' in data and data['senha']:
