@@ -18,7 +18,7 @@ def create_user():
         telefone=data.get('telefone'),
         tipo=data['tipo'],
         endereco=data['endereco'],
-        img=data['img']
+        img=data.get('img')
     )
     
     novo_usuario.set_password(data['senha'])

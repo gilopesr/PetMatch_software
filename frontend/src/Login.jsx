@@ -26,11 +26,20 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        // Login sucesso! 
-        // Dica: Você pode salvar o usuário no localStorage para persistir a sessão
-        localStorage.setItem('user', JSON.stringify(data.user));
-        navigate('/dashboard'); // Ou a página principal após login
-      } else {
+        // Supondo que a sua API Flask retorna algo como:
+        // { "message": "Login efetuado", "user": { "id": 1, "nome": "ONG Tal" } }
+        
+        // Vamos pegar o ID do usuário da resposta (verifique se 'user.id' é o caminho correto do seu backend)
+        const userId = data.user.id; 
+        
+        // Salva apenas o ID (como combinamos pro Dashboard)
+        localStorage.setItem('usuarioLogadoId', userId);
+        
+        // Opcional: Se quiser, pode salvar o objeto inteiro também para uso futuro
+        localStorage.setItem('user', JSON.stringify(data.user)); 
+
+        navigate('/dashboard'); 
+      }else {
         // Erro 401 ou 400 do seu Flask
         alert(data.error || "E-mail ou senha incorretos.");
       }

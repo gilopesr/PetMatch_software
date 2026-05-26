@@ -3,8 +3,6 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 
 const API_URL = 'http://localhost:3006/animais';
 const API_PEDIDOS_URL = 'http://localhost:3006/pedidos';
-const API_USER_URL = 'http://localhost:3006/users/1'; // Endpoint do usuário logado
-const API_ONG_PEDIDOS_URL = 'http://localhost:3006/ong/1/pedidos';
 
 function VisaoGeral() {
   const [nome, setNome] = useState('');
@@ -18,6 +16,8 @@ function VisaoGeral() {
   const [carregandoPedidos, setCarregandoPedidos] = useState(true);
 
   const navigate = useNavigate();
+  const userId = localStorage.getItem('usuarioLogadoId');
+  const API_ONG_PEDIDOS_URL = `http://localhost:3006/ong/${userId}/pedidos`;
 
   // BUSCAR PEDIDOS REAIS DO BACKEND
   useEffect(() => {
@@ -61,8 +61,8 @@ function VisaoGeral() {
       raca,
       idade: parseInt(idade),
       img,
-      user_id: 1, // Será substituído pelo ID real depois,
-      status: 'disponivel' // status inicial
+      user_id: parseInt(userId), 
+      status: 'disponivel'
     };
 
     try {
@@ -226,10 +226,12 @@ function MeusPets() {
   const [petParaExcluir, setPetParaExcluir] = useState(null); 
   const [mensagemSucesso, setMensagemSucesso] = useState(''); 
 
+  const userId = localStorage.getItem('usuarioLogadoId');
+
   useEffect(() => {
     const buscarPets = async () => {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`http://localhost:3006/ong/${userId}/animais`);
         const data = await response.json();
         setMeusPets(data);
       } catch (error) {
@@ -239,7 +241,7 @@ function MeusPets() {
       }
     };
     buscarPets();
-  }, []);
+  }, [userId]);
 
   const updatePet = async(e) => {
     e.preventDefault();
@@ -315,8 +317,7 @@ function MeusPets() {
         <p className="text-gray-500 text-center py-8">Carregando pets...</p>
       ) : meusPets.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500 mb-2">Nenhum pet encontrado na API.</p>
-          <p className="text-sm text-gray-400">Se você já cadastrou, verifique se a API Flask está rodando e com o CORS liberado.</p>
+          <p className="text-gray-500 mb-2">Nenhum pet encontrado.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -625,11 +626,20 @@ export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Busca as informações do usuário centralizado no Dashboard
   useEffect(() => {
+    // 1. Pega o ID do usuário logado
+    const userId = localStorage.getItem('usuarioLogadoId');
+
+    // 2. Se não tiver logado, manda pro login
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
+
+    // 3. Busca dinamicamente os dados do usuário correto
     const buscarUsuario = async () => {
       try {
-        const response = await fetch(API_USER_URL);
+        const response = await fetch(`http://localhost:3006/users/${userId}`);
         if (response.ok) {
           const data = await response.json();
           setUsuario(data);
@@ -640,8 +650,9 @@ export default function Dashboard() {
         setCarregandoUsuario(false);
       }
     };
+    
     buscarUsuario();
-  }, []);
+  }, [navigate]);
 
   const isActive = (path) => {
     return location.pathname === path 
@@ -650,6 +661,7 @@ export default function Dashboard() {
   };
 
   const handleSair = () => {
+    localStorage.removeItem('usuarioLogadoId');
     navigate('/login'); 
   };
 
