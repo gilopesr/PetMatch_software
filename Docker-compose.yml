@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+   db:
+    image: mysql:5.7
+    volumes:
+     - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=Bancos*1999
+      - MYSQL_DATABASE=data_pets
+    ports: 
+       - "3307:3306"
+
+   frontend:
+    build:
+     context: ./frontend
+     dockerfile: Dockerfile
+     target: prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+   backend:
+     build:  
+      context: ./backend
+      dockerfile: Dockerfile
+     container_name: backend_pets
+     ports:
+      - "8000:8000"
+     environment:
+      - DATABASE=mysql+pymysql://root:Bancos*1999@db:3306/data_pets
+     depends_on:
+      - db
+
+volumes:
+  db_data:
