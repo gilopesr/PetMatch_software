@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 class Config:
     HOST = '0.0.0.0'
-    PORT = 3006
+    PORT = 8000
     DEBUG = True
     #SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Bancos*1999@localhost:3306/pets"
     SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:27052005@localhost:3306/pets"
