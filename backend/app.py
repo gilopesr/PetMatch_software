@@ -9,11 +9,11 @@ from animais.animais_model import Animais, PedidoAdocao
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
+
     app.config.from_object(Config)
     #app.secret_key = 'chave_secreta'
-    
-    CORS(app)
-    
+        
     db.init_app(app)
 
     app.register_blueprint(user_bp)
@@ -28,6 +28,8 @@ app = create_app()
 
 if __name__ == '__main__':
     app.run(
-        host=Config.HOST, 
-        port=Config.PORT, 
-        debug=Config.DEBUG)
+        host=app.config.get("HOST"), 
+        port=app.config.get("PORT"), 
+        debug=app.config.get("DEBUG"))
+    
+    
