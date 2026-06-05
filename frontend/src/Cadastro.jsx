@@ -9,6 +9,7 @@ function Cadastro() {
     nome: '',
     email: '',
     senha: '',
+    img: '',
     tipo: 'organizacao', // Valor padrão conforme seu modelo
     endereco: '',
     telefone: '' // Opcional no seu backend (.get)
@@ -18,7 +19,7 @@ function Cadastro() {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://127.0.0.1:3006/users', { // Rota do seu user_bp
+      const response = await fetch('http://localhost:8000/users', { // Rota do seu user_bp
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

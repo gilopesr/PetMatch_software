@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 
-const API_URL = 'http://localhost:3006/animais';
-const API_PEDIDOS_URL = 'http://localhost:3006/pedidos';
+const API_URL = 'http://localhost:8000/animais';
+const API_PEDIDOS_URL = 'http://localhost:8000/pedidos';
 
 function VisaoGeral() {
   const [nome, setNome] = useState('');
@@ -17,7 +17,7 @@ function VisaoGeral() {
 
   const navigate = useNavigate();
   const userId = localStorage.getItem('usuarioLogadoId');
-  const API_ONG_PEDIDOS_URL = `http://localhost:3006/ong/${userId}/pedidos`;
+  const API_ONG_PEDIDOS_URL = `http://localhost:8000/ong/${userId}/pedidos`;
 
   // BUSCAR PEDIDOS REAIS DO BACKEND
   useEffect(() => {
@@ -231,7 +231,7 @@ function MeusPets() {
   useEffect(() => {
     const buscarPets = async () => {
       try {
-        const response = await fetch(`http://localhost:3006/ong/${userId}/animais`);
+        const response = await fetch(`http://localhost:8000/ong/${userId}/animais`);
         const data = await response.json();
         setMeusPets(data);
       } catch (error) {
@@ -639,7 +639,7 @@ export default function Dashboard() {
     // 3. Busca dinamicamente os dados do usuário correto
     const buscarUsuario = async () => {
       try {
-        const response = await fetch(`http://localhost:3006/users/${userId}`);
+        const response = await fetch(`http://localhost:8000/users/${userId}`);
         if (response.ok) {
           const data = await response.json();
           setUsuario(data);

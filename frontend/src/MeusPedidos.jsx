@@ -10,7 +10,7 @@ export default function MeusPedidos() {
 
   // 3. CORREÇÃO: Pegando o ID do localStorage e usando crases (`) para a URL funcionar
   const userId = localStorage.getItem('usuarioLogadoId');
-  const API_ONG_PEDIDOS_URL = `http://localhost:3006/ong/${userId}/pedidos`;
+  const API_ONG_PEDIDOS_URL = `http://localhost:8000/ong/${userId}/pedidos`;
 
   // Função para buscar os pedidos (isolada para podermos recarregar após atualizar)
   const buscarTodosPedidos = async () => {
@@ -37,7 +37,7 @@ export default function MeusPedidos() {
     if (!confirmacao) return;
 
     try {
-      const response = await fetch(`http://localhost:3006/pedidos/${pedidoId}/status`, {
+      const response = await fetch(`http://localhost:8000/pedidos/${pedidoId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: novoStatus })

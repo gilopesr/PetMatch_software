@@ -15,7 +15,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:3006/login', {
+      const response = await fetch('http://localhost:8000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
