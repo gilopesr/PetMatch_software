@@ -8,6 +8,6 @@ class Config:
     #SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Bancos*1999@localhost:3306/pets"
     SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Bancos*1999@db:3306/data_pets"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    #SECRET_KEY = 'chave_secreta'
+    SECRET_KEY = 'chave_secreta'
 
 db = SQLAlchemy()
