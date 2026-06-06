@@ -60,7 +60,7 @@ function Login() {
         </button>
       </header>
 
-      <div className="flex-grow flex items-center justify-center px-6">
+      <div className="flex-row flex items-center justify-center px-6">
         <div className="bg-white p-10 rounded-2xl shadow-sm w-full max-w-md border border-gray-100">
           <h2 className="text-3xl font-extrabold mb-2 text-center">Bem-vindo de volta!</h2>
           <p className="text-gray-500 text-center mb-8">Acesse o painel da sua organização.</p>
