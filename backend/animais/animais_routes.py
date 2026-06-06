@@ -26,7 +26,7 @@ def cadastrar_animal():
             status=data.get('status', 'disponivel'),
             user_id=data['user_id'] ,
             img=data['img'],
-            saude=data.get["saude"]
+            saude=data["saude"]
         )
 
         db.session.add(novo_animal)
@@ -42,6 +42,8 @@ def cadastrar_animal():
 
     except Exception as e:
         db.session.rollback()
+        import traceback
+        traceback.print_exc()
         return jsonify({"erro": "Falha ao cadastrar animal", "detalhes": str(e)}), 500
 
 
