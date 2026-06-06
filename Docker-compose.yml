@@ -20,9 +20,14 @@ services:
     build:
      context: ./frontend
      dockerfile: Dockerfile
-     target: prod
+     target: dev
     ports:
-      - "80:80"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOOLING=true
     depends_on:
       - backend
 
@@ -35,6 +40,9 @@ services:
       - "8000:8000"
      environment:
       - DATABASE=mysql+pymysql://root:Bancos*1999@db:3306/data_pets
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONUNBUFFERED=1
      depends_on:
        db:
          condition: service_healthy
