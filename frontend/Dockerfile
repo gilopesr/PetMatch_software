@@ -12,7 +12,9 @@ COPY public/ ./public/
 COPY index.html ./ 
 COPY vite.config.js postcss.config.js ./
 
-RUN npm run build
+EXPOSE 5173
+
+CMD ["npm" ,"run" ,"dev", "--", "--host", "0.0.0.0"]
 
 # ambiente de produção
 FROM nginx:alpine as prod
