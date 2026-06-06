@@ -1,25 +1,29 @@
 from flask import Flask
 from flask_cors import CORS
 from config import Config, db
-from user.user_route import user_bp
-from user.user_model import User
-from animais.animais_routes import animais_bp
-from animais.animais_model import Animais, PedidoAdocao
-
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
 
     app.config.from_object(Config)
-    #app.secret_key = 'chave_secreta'
-        
+    app.secret_key = Config.SECRET_KEY 
+
+    CORS(app,resources={r'/*':{
+        "origins":['http://localhost:5173',"http://127.0.0.1:5173"],
+        "methods":["GET","POST","PUT","DELETE","OPTIONS"],
+        "allow_headers": ["Content-Type","Authorization"]
+        }})
+
     db.init_app(app)
 
+    from animais.animais_routes import animais_bp
+    from user.user_route import user_bp
     app.register_blueprint(user_bp)
     app.register_blueprint(animais_bp)
 
     with app.app_context():
+        from animais.animais_model import Animais,PedidoAdocao
+        from user.user_model import User
         db.create_all()
 
     return app
