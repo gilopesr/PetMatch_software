@@ -34,7 +34,7 @@ FROM nginx:alpine as prod
 
 WORKDIR /frontend
 
-COPY --from=dev /frontend/dist /usr/share/nginx/html 
+COPY --from=build /frontend/dist /usr/share/nginx/html 
 
 EXPOSE 80
 
