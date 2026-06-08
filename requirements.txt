@@ -191,3 +191,4 @@ widgetsnbextension==4.0.14
 wikipedia==1.4.0
 win32_setctime==1.2.0
 wsproto==1.2.0
+Flask-Mail==0.10.0

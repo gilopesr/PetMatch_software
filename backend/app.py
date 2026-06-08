@@ -1,10 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
-from config import Config, db
+from config import Config, db, mail
 from user.user_route import user_bp
 from user.user_model import User
 from animais.animais_routes import animais_bp
 from animais.animais_model import Animais, PedidoAdocao
+from flask_mail import Mail
 
 
 def create_app():
@@ -18,6 +19,17 @@ def create_app():
 
     app.register_blueprint(user_bp)
     app.register_blueprint(animais_bp)
+
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = 'giovana.rpa27@gmail.com'
+
+    app.config['MAIL_PASSWORD'] = 'mpvh vxfd cmqv yrev'  
+
+    app.config['MAIL_DEFAULT_SENDER'] = 'giovana.rpa27@gmail.com'
+
+    mail.init_app(app)
 
     with app.app_context():
         db.create_all()

@@ -26,7 +26,7 @@ def cadastrar_animal():
             status=data.get('status', 'disponivel'),
             user_id=data['user_id'] ,
             img=data['img'],
-            saude=data.get["saude"]
+            saude=data.get("saude")
         )
 
         db.session.add(novo_animal)
@@ -68,6 +68,29 @@ def listar_animais():
         })
 
     return jsonify(lista_animais), 200
+
+@animais_bp.route('/ong/<int:ong_id>/animais', methods=['GET'])
+def listar_animais_da_ong(ong_id):
+    try:
+        animais = Animais.query.filter_by(user_id=ong_id).all()
+        
+        lista_animais = []
+        for animal in animais:
+            lista_animais.append({
+                "id": animal.id,
+                "nome": animal.nome,
+                "especie": animal.especie,
+                "raca": animal.raca,
+                "idade": animal.idade,
+                "status": animal.status,
+                "user_id": animal.user_id,
+                "img": animal.img,
+                "saude": animal.saude
+            })
+            
+        return jsonify(lista_animais), 200
+    except Exception as e:
+        return jsonify({"erro": "Erro ao buscar os animais desta ONG", "detalhes": str(e)}), 500
 
 @animais_bp.route('/animais/<int:id>',methods=['PUT'])
 def atualizar_animal(id):
@@ -155,7 +178,6 @@ def atualizar_status_pedido(id):
     dados = request.get_json()
     novo_status = dados.get('status')
 
-    # Validação simples para aceitar apenas os status corretos
     if novo_status not in ['pendente', 'aprovado', 'recusado']:
         return jsonify({"erro": "Status inválido"}), 400
 
@@ -164,8 +186,39 @@ def atualizar_status_pedido(id):
         if not pedido:
             return jsonify({"erro": "Pedido não encontrado"}), 404
 
-        # Atualiza o status do pedido
+        # 1. Atualiza o status do pedido
         pedido.status = novo_status
+
+        # 2. SE O PEDIDO FOR APROVADO: Muda o status do animal e envia e-mail
+        if novo_status == 'aprovado':
+            # Busca o animal associado a esse pedido
+            animal = Animais.query.get(pedido.pet_id)
+            if animal:
+                animal.status = 'adotado'  # Muda o status do pet
+            
+            # Se o adotante informou um e-mail, tenta enviar a notificação
+            if pedido.email_adotante:
+                try:
+                    from flask_mail import Message
+                    from config import mail  # Importa o objeto mail configurado (veja Passo 2)
+                    
+                    nome_pet = animal.nome if animal else "seu pet escolhido"
+                    
+                    msg = Message(
+                        subject=f"Boas notícias! Seu pedido de adoção do(a) {nome_pet} foi aprovado! 🎉",
+                        recipients=[pedido.email_adotante],
+                        body=f"Olá, {pedido.nome_adotante}!\n\n"
+                             f"Ficamos extremamente felizes em informar que a sua solicitação para adotar o(a) {nome_pet} foi APROVADA! ❤️\n\n"
+                             f"Nossa equipe entrará em contato em breve através do seu telefone cadastrado para combinar os próximos passos e a retirada do animal.\n\n"
+                             f"Obrigado por escolher adotar e salvar uma vida!\n\n"
+                             f"Atenciosamente,\nEquipe da PetMatch."
+                    )
+                    mail.send(msg)
+                except Exception as email_error:
+                    # Colocamos esse try/except interno para que, se o e-mail falhar (por falta de internet ou erro de senha),
+                    # o banco de dados AINDA ASSIM salve a aprovação do pedido.
+                    print(f"Erro ao enviar o e-mail: {email_error}")
+
         db.session.commit()
 
         return jsonify({

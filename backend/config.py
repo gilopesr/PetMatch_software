@@ -1,7 +1,9 @@
 import os
+from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+mail = Mail()
 
 class Config:
     HOST = '0.0.0.0'
