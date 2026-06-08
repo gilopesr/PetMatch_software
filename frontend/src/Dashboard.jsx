@@ -3,6 +3,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 
 const API_URL = 'http://localhost:8000/animais';
 const API_PEDIDOS_URL = 'http://localhost:8000/pedidos';
+const API_USER_URL = "http://localhost:8000/perfil"
 
 function VisaoGeral() {
   const [nome, setNome] = useState('');
@@ -61,6 +62,7 @@ function VisaoGeral() {
       raca,
       idade: parseInt(idade),
       img,
+      saude: "boa",
       user_id: parseInt(userId), 
       status: 'disponivel'
     };
@@ -231,9 +233,11 @@ function MeusPets() {
   useEffect(() => {
     const buscarPets = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/ong/${userId}/animais`);
+        const response = await fetch(`http://localhost:8000/animais`);
         const data = await response.json();
-        setMeusPets(data);
+        if(response.ok){
+          setMeusPets(data)
+        }
       } catch (error) {
         console.error("Erro ao buscar os pets:", error);
       } finally {
