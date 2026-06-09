@@ -189,10 +189,12 @@ def atualizar_status_pedido(id):
         # 1. Atualiza o status do pedido
         pedido.status = novo_status
 
+        # Busca o animal associado a esse pedido (usado tanto no aprovado quanto no recusado)
+        animal = Animais.query.get(pedido.pet_id)
+        nome_pet = animal.nome if animal else "seu pet escolhido"
+
         # 2. SE O PEDIDO FOR APROVADO: Muda o status do animal e envia e-mail
         if novo_status == 'aprovado':
-            # Busca o animal associado a esse pedido
-            animal = Animais.query.get(pedido.pet_id)
             if animal:
                 animal.status = 'adotado'  # Muda o status do pet
             
@@ -200,9 +202,7 @@ def atualizar_status_pedido(id):
             if pedido.email_adotante:
                 try:
                     from flask_mail import Message
-                    from config import mail  # Importa o objeto mail configurado (veja Passo 2)
-                    
-                    nome_pet = animal.nome if animal else "seu pet escolhido"
+                    from config import mail  # Importa o objeto mail configurado
                     
                     msg = Message(
                         subject=f"Boas notícias! Seu pedido de adoção do(a) {nome_pet} foi aprovado! 🎉",
@@ -215,9 +215,29 @@ def atualizar_status_pedido(id):
                     )
                     mail.send(msg)
                 except Exception as email_error:
-                    # Colocamos esse try/except interno para que, se o e-mail falhar (por falta de internet ou erro de senha),
-                    # o banco de dados AINDA ASSIM salve a aprovação do pedido.
-                    print(f"Erro ao enviar o e-mail: {email_error}")
+                    print(f"Erro ao enviar o e-mail de aprovação: {email_error}")
+
+        # 3. SE O PEDIDO FOR RECUSADO: Envia e-mail de feedback para o adotante
+        elif novo_status == 'recusado':
+            if pedido.email_adotante:
+                try:
+                    from flask_mail import Message
+                    from config import mail
+                    
+                    msg = Message(
+                        subject=f"Atualização sobre o seu pedido de adoção do(a) {nome_pet}",
+                        recipients=[pedido.email_adotante],
+                        body=f"Olá, {pedido.nome_adotante}!\n\n"
+                             f"Agradecemos muito pelo seu interesse em adotar o(a) {nome_pet} e por dedicar seu tempo ao nosso processo de seleção.\n\n"
+                             f"Infelizmente, gostaríamos de informar que o seu pedido de adoção não foi aprovado desta vez. O processo de avaliação leva em conta diversos fatores para garantir a melhor combinação entre o perfil do animal e a rotina da nova família.\n\n"
+                             f"Não desanime! Ainda existem muitos outros animais em nossa plataforma esperando por um lar. Convidamos você a continuar navegando no PetMatch e conhecer outros peludinhos.\n\n"
+                             f"Agradecemos imensamente a sua compreensão.\n\n"
+                             f"Atenciosamente,\nEquipe da PetMatch."
+                    )
+                    mail.send(msg)
+                except Exception as email_error:
+                    # Assim como na aprovação, se o e-mail falhar, o banco salva o status do mesmo jeito
+                    print(f"Erro ao enviar o e-mail de recusa: {email_error}")
 
         db.session.commit()
 
