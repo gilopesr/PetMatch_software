@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 
+const USER_ID = localStorage.getItem("usuarioLogadoId")
+
 const API_URL = 'http://localhost:8000/animais';
 const API_PEDIDOS_URL = 'http://localhost:8000/pedidos';
-const API_USER_URL = "http://localhost:8000/perfil"
+const API_USER_URL = `http://localhost:8000/users/${USER_ID}`
 
 function VisaoGeral() {
   const [nome, setNome] = useState('');
