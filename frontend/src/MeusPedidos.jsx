@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. Adicionado o import do useNavigate
+
+const API_ONG_PEDIDOS_URL = 'http://localhost:8000/ong/1/pedidos'; // Fixado na ONG 1
 
 export default function MeusPedidos() {
   const [pedidos, setPedidos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [filtroStatus, setFiltroStatus] = useState('todos');
-
-  const navigate = useNavigate(); // 2. Inicializando a função de navegação
-
-  // 3. CORREÇÃO: Pegando o ID do localStorage e usando crases (`) para a URL funcionar
-  const userId = localStorage.getItem('usuarioLogadoId');
-  const API_ONG_PEDIDOS_URL = `http://localhost:8000/ong/${userId}/pedidos`;
 
   // Função para buscar os pedidos (isolada para podermos recarregar após atualizar)
   const buscarTodosPedidos = async () => {
@@ -64,16 +59,7 @@ export default function MeusPedidos() {
   });
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
-      
-      {/* 4. BOTÃO DE VOLTAR ADICIONADO AQUI */}
-      <button 
-        onClick={() => navigate('/dashboard')} 
-        className="mb-6 flex items-center text-sm font-bold text-gray-500 hover:text-[#E56A45] transition-colors"
-      >
-        <span className="mr-2 text-lg">&larr;</span> Voltar para o Dashboard
-      </button>
-
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">📋 Controle de Adoções</h2>
@@ -103,7 +89,7 @@ export default function MeusPedidos() {
       ) : pedidosFiltrados.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-gray-200 rounded-2xl">
           <span className="text-5xl block mb-3">📂</span>
-          <p className="text-gray-500 font-medium">Nenhum pedido encontrado.</p>
+          <p className="text-gray-500 font-medium">Nenhum pedido encontrado para o filtro selecionado.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -115,7 +101,7 @@ export default function MeusPedidos() {
                 <th className="py-4 px-4">Contatos</th>
                 <th className="py-4 px-4">Mensagem enviada</th>
                 <th className="py-4 px-4">Data</th>
-                <th className="py-4 px-4 text-center">Status atual</th>
+                <th className="py-4 px-4 text-center">Status attuale</th>
                 <th className="py-4 px-4 text-center">Ações</th>
               </tr>
             </thead>

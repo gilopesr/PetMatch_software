@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 // Ajuste para as URLs reais da sua API
-const API_ANIMAIS_URL = 'http://localhost:3006/animais'; 
-const API_PEDIDOS_URL = 'http://localhost:3006/pedidos';
+const API_ANIMAIS_URL = 'http://localhost:8000/animais'; 
+const API_PEDIDOS_URL = 'http://localhost:8000/pedidos';
 
 export default function Adocao() {
   const [pets, setPets] = useState([]);
